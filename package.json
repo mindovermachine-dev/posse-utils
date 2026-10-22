@@ -1,0 +1,23 @@
+{
+  "name": "posse-utils",
+  "scripts": {
+    "dev": "npx --prefix astro astro dev --host 0.0.0.0 --root astro",
+    "start": "npx --prefix astro astro dev --host 0.0.0.0 --root astro",
+    "build": "npx --prefix astro astro build --root astro",
+    "preview": "npx --prefix astro astro preview --host 0.0.0.0 --root astro",
+    "astro": "cd astro && npx astro",
+    "install:astro": "npm --prefix astro install",
+    "install:repo": "npm install",
+    "docs:dev": "remote-astro-theme dev --host 0.0.0.0",
+    "docs:build": "remote-astro-theme build", 
+    "docs:preview": "remote-astro-theme preview --host 0.0.0.0",
+    "write-version": "printf 'Build from %s\\nRef: %s\\nCommit: %s\\n' \"${BUILD_REPO:-$(git remote get-url origin)}\" \"${BUILD_REF:-$(git branch --show-current)}\" \"${BUILD_SHA:-$(git rev-parse HEAD)}\" > astro/public/version.txt"
+  },
+  "devDependencies": {
+    "@mindovermachine-dev/remote-astro-theme": "^0.1.0",
+    "cspell": "^10.4.0",
+    "linkinator": "^7.6.1",
+    "markdownlint-cli2": "^0.21.0",
+    "prettier": "^2.8.8"
+  }
+}

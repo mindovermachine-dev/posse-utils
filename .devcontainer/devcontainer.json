@@ -1,0 +1,43 @@
+// For format details, see https://aka.ms/devcontainer.json
+{
+  "name": "posse-utils",
+  "image": "mcr.microsoft.com/devcontainers/base:noble",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/npm-packages:1": {
+      "packages": [
+        "markdownlint-cli2",
+        "prettier",
+        "cspell",
+        "@mindovermachine-dev/remote-astro-theme"
+      ]
+    }    
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "gh ext install devx-cafe/gh-insitu && gh insitu run post-create",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "mhutchie.git-graph",
+        "mk12.better-git-line-blame",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "go.lintTool": "golangci-lint-v2",
+        "go.lintOnSave": "workspace",
+        "go.formatTool": "goimports",
+        "[go]": {
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+  "remoteEnv": {
+    "GH_TOKEN": "${localEnv:GH_TOKEN}"
+  }
+}

@@ -1,0 +1,105 @@
+# .insitu.yml – insitu self-hosting configuration
+# Run 'insitu plan' to preview  |  'insitu run' to execute
+# cspell:ignore markdownlint
+
+defaults:
+  die-on-error: true
+  timeout: 5m
+  verbose: false
+
+inventory:
+  - id: "gh-auth"
+    name: "GitHub Authentication"
+    command: "gh auth status"
+
+  - id: "install-takt"
+    name: "Install Takt"
+    command: "gh extension install devx-cafe/gh-tt"
+
+  - id: "cspell"
+    name: "Run cspell"
+    command: "cspell"
+
+  - id: "markdownlint"
+    name: "Run markdownlint"
+    command: "markdownlint-cli2"
+
+  - id: "prettier"
+    name: "Run Prettier"
+    command: "prettier --check ."
+
+  - id: "install-takt-shortcuts"
+    name: "Install Takt Shortcuts"
+    command: |
+      gh alias set workon '!gh tt workon "$@"' --clobber 
+      gh alias set wrapup '!gh tt wrapup "$@"' --clobber
+      gh alias set deliver '!gh tt deliver "$@"' --clobber
+      gh alias set semver '!gh tt semver "$@"' --clobber
+
+  - id: "safe-repo"
+    name: "Mark repository as safe for git operations"
+    command: "git config --global --add safe.directory $(pwd)"
+
+  - id: repo-gitconfig
+    name: "Use repo-root .gitconfig for consistent git settings"
+    command: |
+      git config --local --get include.path | grep -e ../.gitconfig >/dev/null 2>&1 || \
+      git config --local --add include.path ../.gitconfig
+
+  - id: repo-install
+    name: "Install repo dependencies"
+    command: |
+      npm install
+
+  - id: "install-lint-tools"
+    name: "Install linting and checker tools"
+    command: |
+      npm install -g cspell markdownlint-cli2 prettier
+
+  - id: "fix-markdown"
+    name: "Fix all fixable markdown issues"
+    command: |
+      markdownlint-cli2 --fix
+
+  - id: "fix-prettier"
+    name: "Fix all fixable prettier issues"
+    command: |
+      prettier --write .
+
+waves:
+  - id: "post-create"
+    name: "Dev Container Post Create"
+    parallel: true
+    checks:
+      - "gh-auth"
+      - "install-takt"
+      - "install-takt-shortcuts"
+      - "safe-repo"
+      - "repo-gitconfig"
+      - "repo-install"
+
+  - id: "prep-runner"
+    name: "Run to prepare GitHub runner"
+    parallel: true
+    checks:
+      - "gh-auth"
+      - "repo-install"
+      - "repo-gitconfig"
+      - "install-lint-tools"
+
+
+  - id: "trunk-worthy"
+    name: "Worthy for trunk - build"
+    parallel: true
+    checks:
+      - "cspell"
+      - "markdownlint"
+      - "prettier"
+
+
+  - id: "fix-all"
+    name: "Fix anything that can be fixed automatically"
+    parallel: true
+    checks:
+      - "fix-markdown"
+      - "fix-prettier"
