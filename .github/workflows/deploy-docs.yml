@@ -2,6 +2,15 @@ name: Deploy docs to GitHub Pages
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'           # Matches Core SemVer versions - without a prefix: 0.9.0, 1.2.3
+      - '[a-zA-Z]+[0-9]+.[0-9]+.[0-9]+'  # Matches Core SemVer versions - with a prefix: v1.0.0, ver1.0.0, RC1.0.0
+      - '[0-9]+.[0-9]+.[0-9]+*'          # Matches Build and Prerelease SemVer versions - without a prefix: 0.9.0+1.03ed4d1, 0.9.0-alpha1, 0.9.0-alpha1+1.03ed4d1
+      - '[a-zA-Z]+[0-9]+.[0-9]+.[0-9]+*' # Matches Build and Prerelease SemVer versions - with a prefix: v0.9.0+1.03ed4d1, ver0.9.0-alpha1, RC0.9.0-alpha1+1.03ed4d1
+
 
 permissions:
   contents: read
@@ -17,31 +26,16 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
         with:
-          node-version: 22
-          cache: npm
+          fetch-depth: 0 # Fetch full history to ensure we can merge and push
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build docs
-        run: npm run docs:build
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload docs artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Build and deploy docs
+        id: deploy
+        uses: mindovermachine-dev/remote-astro-theme/docs-deploy@v1
+        # with: # Uncomment to override defaults
+        #   node-version: 22 #default is 24
+        #   docs-path: astro #default is docs
+        #   version: ^0.1.0 #default is latest
